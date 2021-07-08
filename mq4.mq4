@@ -28,12 +28,26 @@ int STP, TKP;   // To be used for Stop Loss & Take Profit values
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
+
+double FastMACurrent;
+  double FastMAPrevious;
+  double SlowMACurrent;
+  double SlowMAPrevious;
 int OnInit()
   {
+  
+  int FastMAPeriod = 2;
+  int SlowMAPeriod = 30;
+  
+  FastMACurrent = iMA(NULL,0, FastMAPeriod, 0, 0, 0, 0);
+  FastMAPrevious = iMA(NULL, 0, FastMAPeriod, 0, 0,0, 1);
+  SlowMACurrent = iMA(NULL, 0, SlowMAPeriod, 0, 0, 0, 0);
+  SlowMAPrevious = iMA(NULL, 0, SlowMAPeriod, 0, 0,0, 1);
+  
 //--- Get handle for ADX indicator
-   adxHandle=iADX(NULL,0,14,PRICE_HIGH,MODE_MAIN,0)>iADX(NULL,0,14,PRICE_HIGH,MODE_PLUSDI,0);
+ //  adxHandle=iADX(NULL,0,8,PRICE_HIGH,MODE_PLUSDI,0);
 //--- Get the handle for Moving Average indicator
-   maHandle=iMA(NULL,0,13,8,MODE_SMMA,PRICE_MEDIAN,NULL);
+ //  maHandle=iMA(NULL,0,8,8,MODE_SMMA,PRICE_MEDIAN,NULL);
 //--- What if handle returns Invalid Handle
    if(adxHandle<0 || maHandle<0)
      {
@@ -247,8 +261,10 @@ void OnTick()
            }
           
 
-          if((ArraySize(maVal)>2) && (maVal[0]>maVal[1])  && (maVal[1]>maVal[2])) // MA-8 Increasing upwards 
-    if((plsDI[0]>minDI[0]))   // +DI greater than -DI
+        //  if((ArraySize(maVal)>2) && (maVal[0]>maVal[1])  && (maVal[1]>maVal[2])) // MA-8 Increasing upwards 
+   // if((plsDI[0]>minDI[0]))   // +DI greater than -DI
+    
+    if(FastMACurrent > SlowMACurrent && FastMAPrevious < SlowMAPrevious)
      if  (!sym_max(_Symbol))
          if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,0,"Double SMA Crossover",EA_Magic,0,Blue)) //Request is completed or order placed
            {
@@ -264,8 +280,10 @@ void OnTick()
            }
      
      
-   if((ArraySize(maVal)>2) && (maVal[0]<maVal[1]) && (maVal[1]<maVal[2]))//MA-8 decreasing downwards
-        if((plsDI[0]<minDI[0]))  // -DI greater than +DI
+   //if((ArraySize(maVal)>2) && (maVal[0]<maVal[1]) && (maVal[1]<maVal[2]))//MA-8 decreasing downwards
+      //  if((plsDI[0]<minDI[0]))  // -DI greater than +DI
+        
+        if(FastMACurrent < SlowMACurrent && FastMAPrevious > SlowMAPrevious)
             if(!sym_max(_Symbol))
          if(OrderSend(Symbol(),OP_SELL, LLot,Ask,3,0,0,"Double SMA Crossover",EA_Magic,0,Blue)) //Request is completed or order placed
            {
