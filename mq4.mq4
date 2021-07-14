@@ -1,4 +1,4 @@
-//+------------------------------------------------------------------+
+/+------------------------------------------------------------------+
 //|                                                  My_First_EA.mq5 |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
@@ -29,20 +29,31 @@ int STP, TKP;   // To be used for Stop Loss & Take Profit values
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
 
-double FastMACurrent;
+  double FastMACurrent;
   double FastMAPrevious;
+  double FastMA_Overall;
   double SlowMACurrent;
   double SlowMAPrevious;
+  double SlowMA_Overall;
+  
 int OnInit()
   {
   
   int FastMAPeriod = 2;
   int SlowMAPeriod = 30;
   
-  FastMACurrent = iMA(NULL,0, FastMAPeriod, 0, 0, 0, 0);
-  FastMAPrevious = iMA(NULL, 0, FastMAPeriod, 0, 0,0, 1);
-  SlowMACurrent = iMA(NULL, 0, SlowMAPeriod, 0, 0, 0, 0);
-  SlowMAPrevious = iMA(NULL, 0, SlowMAPeriod, 0, 0,0, 1);
+  //iMA(NULL,0,13,6,MODE_SMA,PRICE_CLOSE,0);
+  //iMA(NULL,PERIOD_CURRENT, FastMAPeriod, 0, 0, 0, 0);
+  
+  FastMACurrent = iMA(NULL,PERIOD_CURRENT, FastMAPeriod, 0, 0, 0, 0);
+  FastMAPrevious = iMA(NULL, 0, FastMAPeriod,6,MODE_SMA,PRICE_CLOSE, 1);
+  
+  FastMA_Overall = iMA(NULL, PERIOD_H4, FastMAPeriod, 0, 0, 0, 0);
+  
+  SlowMACurrent = iMA(NULL, PERIOD_CURRENT, SlowMAPeriod, 0, 0, 0, 0);
+  SlowMAPrevious = iMA(NULL, 0, SlowMAPeriod, 6,MODE_SMA,PRICE_CLOSE, 1);
+  
+  SlowMA_Overall = iMA(NULL, PERIOD_H4, SlowMAPeriod, 0, 0, 0, 0);
   
 //--- Get handle for ADX indicator
  //  adxHandle=iADX(NULL,0,8,PRICE_HIGH,MODE_PLUSDI,0);
@@ -92,9 +103,45 @@ void OnDeinit(const int reason)
  // main target is to force market movement and not subsitute target profit
  // is a form of inhale
  
-double profit = 31;
 
 double acc_red = -700; // danger zone indicator - to start reversing margin on account.
+
+
+int bar_num = 21;
+
+double volatility(){//average open-close difference of the last bar_num
+
+double avg_price = 0;
+
+for(int a=0;a<bar_num;a++){
+
+   double movement = Open[a]-Close[a];
+   
+  if( movement<0){
+  avg_price+=(-movement);
+  }else{
+  avg_price+=movement;
+  }
+}
+avg_price = avg_price/bar_num;
+return avg_price;
+}
+
+
+double volatility_2(){//average of highest and lowest price in the last bar_num
+   double Highest = High[0];
+   double Lowest = Low[0];
+   
+   // Scan the bar_num candles and update the values of the highest and lowest.
+   for (int i = 0; i <= bar_num; i++)
+   {
+      if (High[i] > Highest) Highest = High[i];
+      if (Low[i] < Lowest) Lowest = Low[i];
+   }
+   return (Highest-Lowest)/2;
+}
+
+double profit = ((volatility()+volatility_2())/2)/Point; //31
 
 void OnTick()
   {
@@ -120,7 +167,7 @@ void OnTick()
       if(Old_Time!=New_Time[0]) // if old time isn't equal to new bar time
         {
          IsNewBar=true;   // if it isn't a first call, the new bar has appeared
-         if(IsTesting()) Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
+         if(IsTesting()) // Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
          Old_Time=New_Time[0];            // saving bar time
         }
      }
@@ -148,6 +195,8 @@ void OnTick()
 //--- Define some MQL5 Structures we will use for our trade
    
    MqlTick latest_price;      // To be used for getting recent/latest price quotes
+   
+    profit = ((volatility()+volatility_2())/2)/Point; //31
    
 // the ADX DI+values array
    ArraySetAsSeries(plsDI,true);
@@ -192,26 +241,31 @@ void OnTick()
    
                  OrderSelect(a,SELECT_BY_POS);
                  
+                 double PRICE = (OrderType()==OP_BUY?Bid:Ask);
+                 
             if(AccountInfoDouble(ACCOUNT_PROFIT)>1000 && (Oxygen%inhale==0)){ 
              
             Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
             
-            OrderDelete(a);
-            //m_trade.PositionClose(PositionGetTicket(a)); // close trade of position if profit greater than 11 dollars
+            //OrderDelete(OrderTicket());
+           OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+             //m_trade.PositionClose(PositionGetTicket(a)); // close trade of position if profit greater than 11 dollars
               
             }else if(OrderProfit()>=profit && (Oxygen%inhale==0)){
         
             Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
            
            // m_trade.PositionClose(PositionGetTicket(a)); // close trade of position if profit greater than 11 dollars
-            OrderDelete(OrderTicket());
+            //OrderDelete(OrderTicket());
+           OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
             pump_oxygen();
            
             }else if((OrderProfit())<-profit && (Oxygen%exhale==0)){
             
             if(AccountInfoDouble(ACCOUNT_PROFIT)<acc_red){
             Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
-           OrderDelete(a);
+            OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+           //OrderDelete(OrderTicket());
            // m_trade.PositionClose(PositionGetTicket(a)); 
             pump_oxygen();
             }
@@ -221,15 +275,18 @@ void OnTick()
             //Scraper takes profit below normal target to accomodate stagnant market
            
              Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
-            OrderDelete(a);
+            //OrderDelete(OrderTicket());
+            OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
             // m_trade.PositionClose(PositionGetTicket(a)); 
              pump_oxygen();
             
-            }else if((OrderProfit()<=-7 && OrderProfit()>=-15) && (Oxygen%exhale==0)){
+            }else if((OrderProfit()<=-7) && (Oxygen%exhale==0)){// && OrderProfit()>=-15 && (Oxygen%exhale==0)
             //Position correction - take loss before it gets out of hand 
             
             Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
-            OrderDelete(a);
+            //OrderClose(OrderTicket());
+            OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+            //OrderDelete(OrderTicket());
             //m_trade.PositionClose(OrderTicket()); 
             pump_oxygen();
             }
@@ -264,10 +321,12 @@ void OnTick()
         //  if((ArraySize(maVal)>2) && (maVal[0]>maVal[1])  && (maVal[1]>maVal[2])) // MA-8 Increasing upwards 
    // if((plsDI[0]>minDI[0]))   // +DI greater than -DI
     
-    if(FastMACurrent > SlowMACurrent && FastMAPrevious < SlowMAPrevious)
+    // if((FastMACurrent > SlowMACurrent))//&& (FastMAPrevious < SlowMAPrevious)
+     if(FastMA_Overall > SlowMA_Overall || (FastMACurrent > SlowMACurrent))
      if  (!sym_max(_Symbol))
-         if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,0,"Double SMA Crossover",EA_Magic,0,Blue)) //Request is completed or order placed
+         if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,Ask+profit*Point,"",EA_Magic,0,Blue)) //Request is completed or order placed
            {
+         //Bid-profit*2*Point
       //  m_trade.Buy(LLot,_Symbol,latest_price.ask,NormalizeDouble(latest_price.ask - STP*_Point,_Digits),NormalizeDouble(latest_price.ask + TKP*_Point,_Digits),NULL)   
           
             Print("A Buy order has been successfully placed !!");
@@ -282,11 +341,15 @@ void OnTick()
      
    //if((ArraySize(maVal)>2) && (maVal[0]<maVal[1]) && (maVal[1]<maVal[2]))//MA-8 decreasing downwards
       //  if((plsDI[0]<minDI[0]))  // -DI greater than +DI
-        
-        if(FastMACurrent < SlowMACurrent && FastMAPrevious > SlowMAPrevious)
-            if(!sym_max(_Symbol))
-         if(OrderSend(Symbol(),OP_SELL, LLot,Ask,3,0,0,"Double SMA Crossover",EA_Magic,0,Blue)) //Request is completed or order placed
+         
+         //if((FastMACurrent < SlowMACurrent)) // correspond direction with current timeframe && (FastMAPrevious > SlowMAPrevious)
+         if(FastMA_Overall < SlowMA_Overall || (FastMACurrent < SlowMACurrent)) // confirm overall direction of chart on 4h timeframe
+        if(!sym_max(_Symbol))
+         if(OrderSend(Symbol(),OP_SELL, LLot,Bid,3,0,Bid-profit*Point,"",EA_Magic,0,Red)) //Request is completed or order placed
            {
+           
+            //Bid+profit*2*Point
+        
        //  m_trade.Sell(LLot,_Symbol,NormalizeDouble(latest_price.bid,_Digits),NormalizeDouble(latest_price.bid + STP*_Point,_Digits), NormalizeDouble(latest_price.bid - TKP*_Point,_Digits),NULL)  
             Print("A Sell order has been successfully placed !!");
             
