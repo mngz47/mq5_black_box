@@ -1,4 +1,4 @@
-/+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
 //|                                                  My_First_EA.mq5 |
 //|                        Copyright 2010, MetaQuotes Software Corp. |
 //|                                              http://www.mql5.com |
@@ -294,7 +294,7 @@ void OnTick()
                }
      pump_oxygen(); // tick related movement      
    
-   double LLot = 0.1;
+   double LLot = 0.01;
    // dont place more than 2 orders at once for accont balance less than 100 dollars - prevent account from reaching 0 equity
     
            if(AccountInfoDouble(ACCOUNT_BALANCE)<=100){
@@ -324,11 +324,21 @@ void OnTick()
     // if((FastMACurrent > SlowMACurrent))//&& (FastMAPrevious < SlowMAPrevious)
      if(FastMA_Overall > SlowMA_Overall || (FastMACurrent > SlowMACurrent))
      if  (!sym_max(_Symbol))
-         if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,Ask+profit*Point,"",EA_Magic,0,Blue)) //Request is completed or order placed
+         if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,0,"",EA_Magic,0,Blue)) //Request is completed or order placed
            {
+           //Ask+profit*Point
          //Bid-profit*2*Point
       //  m_trade.Buy(LLot,_Symbol,latest_price.ask,NormalizeDouble(latest_price.ask - STP*_Point,_Digits),NormalizeDouble(latest_price.ask + TKP*_Point,_Digits),NULL)   
-          
+          for(int aa=0;aa<OrdersTotal();aa++){//close all positive opposite trades
+                 OrderSelect(aa,SELECT_BY_POS);
+                 
+                 if(OrderType()==OP_BUY){
+                     if(OrderProfit()>0){
+                     PRICE = (OrderType()==OP_SELL?Bid:Ask);
+                      OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+                     }
+                 }
+                 }
             Print("A Buy order has been successfully placed !!");
            }
          else
@@ -345,12 +355,22 @@ void OnTick()
          //if((FastMACurrent < SlowMACurrent)) // correspond direction with current timeframe && (FastMAPrevious > SlowMAPrevious)
          if(FastMA_Overall < SlowMA_Overall || (FastMACurrent < SlowMACurrent)) // confirm overall direction of chart on 4h timeframe
         if(!sym_max(_Symbol))
-         if(OrderSend(Symbol(),OP_SELL, LLot,Bid,3,0,Bid-profit*Point,"",EA_Magic,0,Red)) //Request is completed or order placed
+         if(OrderSend(Symbol(),OP_SELL, LLot,Bid,3,0,0,"",EA_Magic,0,Red)) //Request is completed or order placed
            {
-           
+           //Bid-profit*Point
             //Bid+profit*2*Point
-        
        //  m_trade.Sell(LLot,_Symbol,NormalizeDouble(latest_price.bid,_Digits),NormalizeDouble(latest_price.bid + STP*_Point,_Digits), NormalizeDouble(latest_price.bid - TKP*_Point,_Digits),NULL)  
+           
+           for(aa=0;aa<OrdersTotal();aa++){//close all positive opposite trades
+                 OrderSelect(aa,SELECT_BY_POS);
+                  
+                 if(OrderType()==OP_BUY){
+                     if(OrderProfit()>0){
+                     PRICE = (OrderType()==OP_BUY?Bid:Ask);
+                      OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+                     }
+                 }
+                 }
             Print("A Sell order has been successfully placed !!");
             
            }
