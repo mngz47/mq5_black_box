@@ -36,6 +36,34 @@ int STP, TKP;   // To be used for Stop Loss & Take Profit values
   double SlowMAPrevious;
   double SlowMA_Overall;
   
+  
+  int findNextPeak(int mode,int count,int startBar){
+  if(startBar<0){
+  count +=startBar;
+  startBar = 0;
+  }
+  return (mode==MODE_HIGH?
+  iHighest(Symbol(),Period(),(ENUM_SERIESMODE)mode,count,startBar):
+  iLowest(Symbol(),Period(),(ENUM_SERIESMODE)mode,count,startBar));
+  }
+  
+   int findPeak(int mode,int count,int startBar){
+   
+         if(mode!=MODE_HIGH && mode!=MODE_LOW) return(-1);
+         
+         int currentBar = startBar;
+         int foundBar = findNextPeak(mode, count*2+1, currentBar-count);
+         
+         while (foundBar!=currentBar){
+         currentBar = findNextPeak(mode, count, currentBar+1);
+         foundBar = findNextPeak(mode, count*2+1, currentBar-count);
+         }
+      return currentBar;         
+  }
+  
+  bool goingDown;
+  bool goingUp;
+  
 int OnInit()
   {
   
@@ -54,6 +82,29 @@ int OnInit()
   SlowMAPrevious = iMA(NULL, 0, SlowMAPeriod, 6,MODE_SMA,PRICE_CLOSE, 1);
   
   SlowMA_Overall = iMA(NULL, PERIOD_H4, SlowMAPeriod, 0, 0, 0, 0);
+  
+  
+  int bar1 = findPeak(MODE_HIGH,5,0);
+  int bar2 = findPeak(MODE_HIGH,5,bar1+1);
+  
+  goingDown = ((bar2-bar1)>0);
+  
+  ObjectDelete(0,"upper");
+  ObjectCreate(0, "upper", OBJ_TREND, 0, iTime(Symbol(),Period(),bar2),iHigh(Symbol(),Period(),bar2),iTime(Symbol(),Period(),bar1),iHigh(Symbol(),Period(),bar1));
+  ObjectSetInteger(0, "upper", OBJPROP_COLOR, clrBlue);
+  ObjectSetInteger(0, "upper", OBJPROP_WIDTH, 3);
+  ObjectSetInteger(0, "upper", OBJPROP_RAY_RIGHT, true);
+  
+  bar1 = findPeak(MODE_LOW,5,0);
+  bar2 = findPeak(MODE_LOW,5,bar1+1);
+  
+  goingUp = ((bar2-bar1)<0);
+  
+  ObjectDelete(0,"lower");
+  ObjectCreate(0, "lower", OBJ_TREND, 0, iTime(Symbol(),Period(),bar2),iHigh(Symbol(),Period(),bar2),iTime(Symbol(),Period(),bar1),iHigh(Symbol(),Period(),bar1));
+  ObjectSetInteger(0, "lower", OBJPROP_COLOR, clrBlue);
+  ObjectSetInteger(0, "lower", OBJPROP_WIDTH, 3);
+  ObjectSetInteger(0, "lower", OBJPROP_RAY_RIGHT, true);
   
 //--- Get handle for ADX indicator
  //  adxHandle=iADX(NULL,0,8,PRICE_HIGH,MODE_PLUSDI,0);
@@ -142,6 +193,12 @@ double volatility_2(){//average of highest and lowest price in the last bar_num
 }
 
 double profit = ((volatility()+volatility_2())/2)/Point; //31
+
+
+double marketDirection(){
+   return (Open[5]-Close[0]);
+}
+
 
 void OnTick()
   {
@@ -280,7 +337,7 @@ void OnTick()
             // m_trade.PositionClose(PositionGetTicket(a)); 
              pump_oxygen();
             
-            }else if((OrderProfit()<=-7) && (Oxygen%exhale==0)){// && OrderProfit()>=-15 && (Oxygen%exhale==0)
+            }else if((OrderProfit()<=-(profit+5)) && (Oxygen%exhale==0)){// && OrderProfit()>=-15 && (Oxygen%exhale==0)
             //Position correction - take loss before it gets out of hand 
             
             Print(OrderTicket()," Profit From Position: ",(OrderProfit()));
@@ -322,23 +379,16 @@ void OnTick()
    // if((plsDI[0]>minDI[0]))   // +DI greater than -DI
     
     // if((FastMACurrent > SlowMACurrent))//&& (FastMAPrevious < SlowMAPrevious)
-     if(FastMA_Overall > SlowMA_Overall || (FastMACurrent > SlowMACurrent))
-     if  (!sym_max(_Symbol))
-         if(  OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,0,"",EA_Magic,0,Blue)) //Request is completed or order placed
+    // if(goingUp)
+     if(marketDirection()<0)// buy action - going up
+     if((FastMA_Overall < SlowMA_Overall) && (FastMACurrent > SlowMACurrent))//|| 
+     if(!sym_max(_Symbol))
+         if(OrderSend(Symbol(),OP_BUY, LLot,Ask,3,0,0,"",EA_Magic,0,Blue)) //Request is completed or order placed
            {
            //Ask+profit*Point
          //Bid-profit*2*Point
       //  m_trade.Buy(LLot,_Symbol,latest_price.ask,NormalizeDouble(latest_price.ask - STP*_Point,_Digits),NormalizeDouble(latest_price.ask + TKP*_Point,_Digits),NULL)   
-          for(int aa=0;aa<OrdersTotal();aa++){//close all positive opposite trades
-                 OrderSelect(aa,SELECT_BY_POS);
-                 
-                 if(OrderType()==OP_BUY){
-                     if(OrderProfit()>0){
-                     PRICE = (OrderType()==OP_SELL?Bid:Ask);
-                      OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
-                     }
-                 }
-                 }
+          closePositiveOppTrade(OP_SELL);
             Print("A Buy order has been successfully placed !!");
            }
          else
@@ -352,25 +402,22 @@ void OnTick()
    //if((ArraySize(maVal)>2) && (maVal[0]<maVal[1]) && (maVal[1]<maVal[2]))//MA-8 decreasing downwards
       //  if((plsDI[0]<minDI[0]))  // -DI greater than +DI
          
+         FastMA_Overall = iMA(NULL, PERIOD_H1, 2, 0, 0, 0, 0);
+         SlowMA_Overall = iMA(NULL, PERIOD_H1, 30, 0, 0, 0, 0);
+         
          //if((FastMACurrent < SlowMACurrent)) // correspond direction with current timeframe && (FastMAPrevious > SlowMAPrevious)
-         if(FastMA_Overall < SlowMA_Overall || (FastMACurrent < SlowMACurrent)) // confirm overall direction of chart on 4h timeframe
-        if(!sym_max(_Symbol))
+       //if(goingDown)
+         if(marketDirection()>0) // sell action - going down
+         if((FastMA_Overall > SlowMA_Overall) && (FastMACurrent < SlowMACurrent)) // confirm overall direction of chart on 4h timeframe
+         if(!sym_max(_Symbol))
          if(OrderSend(Symbol(),OP_SELL, LLot,Bid,3,0,0,"",EA_Magic,0,Red)) //Request is completed or order placed
            {
            //Bid-profit*Point
             //Bid+profit*2*Point
        //  m_trade.Sell(LLot,_Symbol,NormalizeDouble(latest_price.bid,_Digits),NormalizeDouble(latest_price.bid + STP*_Point,_Digits), NormalizeDouble(latest_price.bid - TKP*_Point,_Digits),NULL)  
            
-           for(aa=0;aa<OrdersTotal();aa++){//close all positive opposite trades
-                 OrderSelect(aa,SELECT_BY_POS);
-                  
-                 if(OrderType()==OP_BUY){
-                     if(OrderProfit()>0){
-                     PRICE = (OrderType()==OP_BUY?Bid:Ask);
-                      OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
-                     }
-                 }
-                 }
+            closePositiveOppTrade(OP_BUY);
+          
             Print("A Sell order has been successfully placed !!");
             
            }
@@ -384,6 +431,22 @@ void OnTick()
      
    return;
   }
+    
+    
+    void closePositiveOppTrade(int orderType){
+    
+     for(int aa=0;aa<OrdersTotal();aa++){//close all positive opposite trades
+                 OrderSelect(aa,SELECT_BY_POS);
+                  
+                 if(OrderType()==orderType){
+                     if(OrderProfit()>0){
+                    double PRICE = (OrderType()==OP_BUY?Bid:Ask);
+                      OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
+                     }
+                 }
+                 }
+    
+    }
     
      void pump_oxygen(){
   if(Oxygen>=1000){
