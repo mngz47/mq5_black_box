@@ -44,14 +44,14 @@ void OnDeinit(const int reason)
 void OnTick()
   {
   
-  Double newEntry =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 0, 0);
+  Double newEntry =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 0, 0);
   
   if(newEntry){
   if(if((TotalOrder(MAGIC)<NO_OF_TRADES)){){
   
-  Double orderType =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 1, 0);
-   Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 2, 0);
-    Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 5, 0);
+    Double orderType =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 1, 0);
+    Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 2, 0);
+    Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 5, 0);
     
     
   OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
