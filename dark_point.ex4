@@ -53,6 +53,8 @@ void OnTick()
     Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 2, 0);
     Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 5, 0);
     
+    //extern int xi_ATR.Period = 20;
+    //extern double xd_ATR.Mult = 2.0;
     //test01=  iCustom(NULL, 0, "Test", "testvalue", 1,1);
     
     
