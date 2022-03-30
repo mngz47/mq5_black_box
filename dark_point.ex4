@@ -53,12 +53,14 @@ void OnTick()
     Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 2, 0);
     Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 5, 0);
     
+    Print("(newEntry,orderType,sl,tp)Buffer("+newEntry+","+orderType+","+sl+","+tp+")");
+    
     //extern int xi_ATR.Period = 20;
     //extern double xd_ATR.Mult = 2.0;
     //test01=  iCustom(NULL, 0, "Test", "testvalue", 1,1);
     
     
-  OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
+  //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
  
  }
   }
