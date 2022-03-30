@@ -1,0 +1,84 @@
+//+------------------------------------------------------------------+
+//|                                              pinBarEngulfing.mq4 |
+//|                        Copyright 2021, MetaQuotes Software Corp. |
+//|                                             https://www.mql5.com |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2021, MetaQuotes Software Corp."
+#property link      "https://www.mql5.com"
+#property version   "1.00"
+#property strict
+
+//--- input parameters
+input float    LOT=0.02;
+input int      NO_OF_TRADES=3;
+input int      MAGIC=838;
+
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+//---
+   
+   ChartSetInteger(0,CHART_COLOR_BACKGROUND,clrAliceBlue);
+   ChartSetInteger(0,CHART_COLOR_FOREGROUND,clrBlack);
+   ChartSetInteger(0,CHART_COLOR_GRID,clrGreen);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,clrBlack);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrYellow);
+   
+//---
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+//---
+   
+  }
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+  
+  Double newEntry =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 0, 0);
+  
+  if(newEntry){
+  if(if((TotalOrder(MAGIC)<NO_OF_TRADES)){){
+  
+  Double orderType =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 1, 0);
+   Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 2, 0);
+    Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'dark_point', 0, 5, 0);
+    
+    
+  OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
+ 
+ }
+  }
+  
+//---
+   
+  }
+
+    
+    //take profit low/high of 
+    //stop loss low/high of wick/pinBar
+    
+    double TotalOrder(int magic)
+  {   
+   double GetTotalOrder = 0;
+   for(int cnt = 0; cnt < OrdersTotal(); cnt++)
+     {
+       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
+       if(OrderMagicNumber() == magic)
+         {
+           GetTotalOrder += (OrdersTotal());
+         }   
+     }
+   return(GetTotalOrder);
+  }
+  
+  
