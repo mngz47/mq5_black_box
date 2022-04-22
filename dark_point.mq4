@@ -1,9 +1,9 @@
 //+------------------------------------------------------------------+
 //|                                                   dark_point.mq4 |
-//|                        Copyright 2021, MetaQuotes Software Corp. |
+//|                        Copyright 2022, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2021, MetaQuotes Software Corp."
+#property copyright "Copyright 2022, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #property strict
@@ -19,14 +19,8 @@ input int      MAGIC=838;
 //+------------------------------------------------------------------+
 int OnInit()
   {
-//---
-   
-   ChartSetInteger(0,CHART_COLOR_BACKGROUND,clrAliceBlue);
-   ChartSetInteger(0,CHART_COLOR_FOREGROUND,clrBlack);
-   ChartSetInteger(0,CHART_COLOR_GRID,clrGreen);
-   ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,clrBlack);
-   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrYellow);
-   
+  
+   double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
 //---
    return(INIT_SUCCEEDED);
   }
@@ -44,28 +38,29 @@ void OnDeinit(const int reason)
 void OnTick()
   {
   
-  Double indicator =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 0, 0);
+  double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
+  if(indicator){
   
-  double tp_price = ObjectGet(ObjectName(0), PRICE);
+  string obj_name = ObjectName(ObjectsTotal()-1);
   
-  datatime signal_time  = ObjectGetTimeByValue(0,ObjectName(0),tp_price);
+  double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
   
-  //if((signal_time+10*60) < TimeCurrent()){
-  if(if((TotalOrder(MAGIC)<NO_OF_TRADES)){){
+  datetime signal_time  =  ObjectGet(obj_name, OBJPROP_TIME1);
   
-    bool orderType =  tp_price>price; //buy condition
+  if((signal_time+10*60) < TimeCurrent()){ // Use signal within 10 minutes of being released
+  if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal
+  
+    bool orderType =  tp_price>PRICE_OPEN; //buy if condition is true
     
-    //Double sl;
+    double sl = 0;
     
-    Double tp =  tp_price;
+    Print("(time,orderType,sl,tp)SIGNAL("+signal_time+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
     
-    Print("(orderType,sl,tp)Buffer("+(orderType?OP_BUY:OP_SELL)+","+sl+","+tp+")");
-    
-  //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
+  //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrAliceBlue);
  
  }
-  //}
-  
+  }
+   }
 //---
    
   }
@@ -83,5 +78,3 @@ void OnTick()
      }
    return(GetTotalOrder);
   }
-  
-  
