@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                              pinBarEngulfing.mq4 |
+//|                                                   dark_point.mq4 |
 //|                        Copyright 2021, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -44,34 +44,31 @@ void OnDeinit(const int reason)
 void OnTick()
   {
   
-  Double newEntry =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 0, 0);
+  Double indicator =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 0, 0);
   
-  if(newEntry){
+  double tp_price = ObjectGet(ObjectName(0), PRICE);
+  
+  datatime signal_time  = ObjectGetTimeByValue(0,ObjectName(0),tp_price);
+  
+  //if((signal_time+10*60) < TimeCurrent()){
   if(if((TotalOrder(MAGIC)<NO_OF_TRADES)){){
   
-    Double orderType =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 1, 0);
-    Double sl =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 2, 0);
-    Double tp =  iCustom(Symbol(), PERIOD_CURRENT, 'Dark Point', 0, 5, 0);
+    bool orderType =  tp_price>price; //buy condition
     
-    Print("(newEntry,orderType,sl,tp)Buffer("+newEntry+","+orderType+","+sl+","+tp+")");
+    //Double sl;
     
-    //extern int xi_ATR.Period = 20;
-    //extern double xd_ATR.Mult = 2.0;
-    //test01=  iCustom(NULL, 0, "Test", "testvalue", 1,1);
+    Double tp =  tp_price;
     
+    Print("(orderType,sl,tp)Buffer("+(orderType?OP_BUY:OP_SELL)+","+sl+","+tp+")");
     
   //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
  
  }
-  }
+  //}
   
 //---
    
   }
-
-    
-    //take profit low/high of 
-    //stop loss low/high of wick/pinBar
     
     double TotalOrder(int magic)
   {   
