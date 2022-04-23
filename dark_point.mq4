@@ -15,12 +15,16 @@ input int      MAGIC=838;
 
 
 //+------------------------------------------------------------------+
-//| Expert initialization function                                   |
+//| Expert initialization function                   
+// Trade US30 H4             |
 //+------------------------------------------------------------------+
 int OnInit()
   {
   
    double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
+      
+  }
+   
 //---
    return(INIT_SUCCEEDED);
   }
@@ -43,16 +47,20 @@ void OnTick()
   
   string obj_name = ObjectName(ObjectsTotal()-1);
   
-  double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
-  
   datetime signal_time  =  ObjectGet(obj_name, OBJPROP_TIME1);
   
   if((signal_time+10*60) < TimeCurrent()){ // Use signal within 10 minutes of being released
   if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal
   
-    bool orderType =  tp_price>PRICE_OPEN; //buy if condition is true
+    double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    double sl = 0;
+    bool orderType =  tp_price>PRICE_OPEN; //buy if condition is true
+     
+    double sl_object_index = ObjectsTotal()/5*2;
+    
+    obj_name = ObjectName(sl_object_index);
+    
+    double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);//(orderType?Bid-100*Point:Ask+100*Point); //1 dollar stop loss
     
     Print("(time,orderType,sl,tp)SIGNAL("+signal_time+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
     
