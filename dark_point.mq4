@@ -60,11 +60,11 @@ void OnTick()
     
     obj_name = ObjectName(sl_object_index);
     
-    double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);//(orderType?Bid-100*Point:Ask+100*Point); //1 dollar stop loss
+    double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
     Print("(time,orderType,sl,tp)SIGNAL("+signal_time+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
     
-  //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrAliceBlue);
+    OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,(orderType?Bid:Ask),0,sl,tp_price,0,MAGIC,0,clrAliceBlue);
  
  }
   }
