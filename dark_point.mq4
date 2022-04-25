@@ -16,14 +16,14 @@ input int      MAGIC=838;
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                   
-// Trade US30 H4             |
+// Trade USTECH M5             |
 //+------------------------------------------------------------------+
 int OnInit()
   {
   
    double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
       
-  }
+  
    
 //---
    return(INIT_SUCCEEDED);
@@ -47,24 +47,27 @@ void OnTick()
   
   string obj_name = ObjectName(ObjectsTotal()-1);
   
-  datetime signal_time  =  ObjectGet(obj_name, OBJPROP_TIME1);
+  datetime signal_time = (ObjectGet(obj_name, OBJPROP_TIME1) + (15*60));
   
-  if((signal_time+10*60) < TimeCurrent()){ // Use signal within 10 minutes of being released
+  datetime signal_time_2 = __DATETIME__;
+  
+  if(signal_time < signal_time_2){ // Use signal within 10 minutes of being released
+  
   if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal
   
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
     bool orderType =  tp_price>PRICE_OPEN; //buy if condition is true
      
-    double sl_object_index = ObjectsTotal()/5*2;
+    int sl_object_index = ObjectsTotal()/5*1;
     
     obj_name = ObjectName(sl_object_index);
     
-    double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);
+    double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);//(orderType?Bid-100*Point:Ask+100*Point); //1 dollar stop loss
     
-    Print("(time,orderType,sl,tp)SIGNAL("+signal_time+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
+    Print("(time,time2,orderType,sl,tp)SIGNAL("+signal_time+","+signal_time_2+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
     
-    OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,(orderType?Bid:Ask),0,sl,tp_price,0,MAGIC,0,clrAliceBlue);
+    OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
  
  }
   }
