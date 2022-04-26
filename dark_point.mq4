@@ -18,13 +18,13 @@ input int      MAGIC=838;
 //| Expert initialization function                   
 // Trade USTECH M5             |
 //+------------------------------------------------------------------+
+
+ 
 int OnInit()
   {
   
-   double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
+  double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
       
-  
-   
 //---
    return(INIT_SUCCEEDED);
   }
@@ -39,21 +39,25 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
+
+int total_order = 0;
+
 void OnTick()
   {
   
-  double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
-  if(indicator){
-  
   string obj_name = ObjectName(ObjectsTotal()-1);
   
-  datetime signal_time = (ObjectGet(obj_name, OBJPROP_TIME1) + (15*60));
+  datetime signal_time = (ObjectGet(obj_name, OBJPROP_TIME1));
+  
+  int m = TimeSeconds(signal_time);
   
   datetime signal_time_2 = __DATETIME__;
   
-  if(signal_time < signal_time_2){ // Use signal within 10 minutes of being released
+  int m2 = TimeSeconds(signal_time_2); 
   
-  if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal
+  if(m <= m2){ // Use signal within 10 minutes of being released
+  
+  if((TotalOrder(MAGIC)<NO_OF_TRADES) && total_order<NO_OF_TRADES){ // Limit number of trades per signal
   
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
@@ -67,11 +71,13 @@ void OnTick()
     
     Print("(time,time2,orderType,sl,tp)SIGNAL("+signal_time+","+signal_time_2+","+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
     
-    OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
+   // OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
  
+      total_order++;
  }
+  }else{
+  total_order = 0;
   }
-   }
 //---
    
   }
