@@ -42,16 +42,14 @@ void OnDeinit(const int reason)
 
 int total_order = 0;
 
-double lastTP = 0;
-
-double tp_price;
+double lastTP = 0; //keep track of successful tp to prevent repeat entry (in consolidating market)
 
 void OnTick()
   {
   
     //take profit
     string obj_name = ObjectName(ObjectsTotal()-1);
-    tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
+    double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
     //stop loss
     int sl_object_index = ((ObjectsTotal()-4)/11)+6;
@@ -67,26 +65,22 @@ void OnTick()
     //Print(PRICE+"<>"+total_order);
     
   if((orderType? (PRICE<tp_price) : (PRICE>tp_price))){
-  
     if((TotalOrder(MAGIC)<NO_OF_TRADES) && total_order<NO_OF_TRADES){ // Limit number of trades per signal 
-      
-    
+      if(lastTP != tp_price){
          Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
-    
          // OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
-          
-         lastTP = tp_price;
-          
          total_order++;   
+      }
     }
- }else{
+   }else{
+      if(lastTP != tp_price){
+            total_order=0;
+            lastTP = tp_price;
+            Print("Total Order Reset");
+      }
+   }
  
-         total_order=0;
-         Print("Total Order Reset");
- }
- 
-//---
-   
+//--- 
   }
     
     double TotalOrder(int magic)
