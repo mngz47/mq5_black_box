@@ -42,12 +42,16 @@ void OnDeinit(const int reason)
 
 int total_order = 0;
 
+double lastTP = 0;
+
+double tp_price;
+
 void OnTick()
   {
   
     //take profit
     string obj_name = ObjectName(ObjectsTotal()-1);
-    double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
+    tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
     //stop loss
     int sl_object_index = ((ObjectsTotal()-4)/11)+6;
@@ -71,13 +75,14 @@ void OnTick()
     
          // OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
           
+         lastTP = tp_price;
           
          total_order++;   
     }
  }else{
  
          total_order=0;
-         
+         Print("Total Order Reset");
  }
  
 //---
