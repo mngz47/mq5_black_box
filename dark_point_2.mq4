@@ -13,12 +13,10 @@ input float    LOT=0.02;
 input int      NO_OF_TRADES=3;
 input int      MAGIC=838;
 
-
 //+------------------------------------------------------------------+
-//| Expert initialization function                   
-// Trade USTECH M5             |
+//       Expert initialization function                  
+//       US30   H1
 //+------------------------------------------------------------------+
-
  
 int OnInit()
   {
