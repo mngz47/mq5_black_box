@@ -38,7 +38,7 @@ void OnDeinit(const int reason)
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 
-int total_order = 0;
+int total_order = 1;
 
 double lastTP = 0; //keep track of successful tp to prevent repeat entry (in consolidating market)
 double lastSL = 0;
@@ -50,12 +50,13 @@ void OnTick()
     string obj_name = ObjectName(ObjectsTotal()-1);
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    //stop loss
-    int sl_object_index = ((ObjectsTotal()-4)/11);
+    //stop loss denominator(9,10,11)
+    int sl_object_index = ((ObjectsTotal()-4)/9);
     obj_name = ObjectName(sl_object_index);
     double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    //Print(sl+";"+tp_price);
+    
+   // Print(sl+";"+tp_price);
     
     bool orderType =  tp_price>sl;  //buy condition  
     
@@ -64,16 +65,13 @@ void OnTick()
     //Print(PRICE+"<>"+total_order);
     
   if((orderType? (PRICE<tp_price && PRICE>sl) : (PRICE>tp_price && PRICE<sl))){
-  
   if((TotalOrder(MAGIC)<=NO_OF_TRADES) && total_order<=NO_OF_TRADES){ // Limit number of trades per signal 
       if((lastTP!=tp_price) && (lastSL!=sl)){
          Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
-         //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC,0,clrBlack);
+         //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC);//0,clrBlack
          total_order++;   
       }
     }
-    
-    
    }else{
       if((lastTP!=tp_price) && (lastSL!=sl)){
             total_order=0;
