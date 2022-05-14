@@ -50,7 +50,7 @@ void OnTick()
     string obj_name = ObjectName(ObjectsTotal()-1);
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    int tp2_object_index = ((ObjectsTotal()-4)/9*3);
+    int tp2_object_index = ((ObjectsTotal()-4)/9*4);
     obj_name = ObjectName(tp2_object_index);
     double tp2 =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
@@ -62,7 +62,6 @@ void OnTick()
     obj_name = ObjectName(sl_object_index);
     double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    
    // Print(sl+";"+tp_price);
     
     bool orderType =  tp_price>sl;  //buy condition  
@@ -71,27 +70,42 @@ void OnTick()
     
     //Print(PRICE+"<>"+total_order);
     
-  if((orderType? (PRICE<tp_price && PRICE>sl) : (PRICE>tp_price && PRICE<sl))){
-  if((TotalOrder(MAGIC)<=NO_OF_TRADES) && total_order<=NO_OF_TRADES){ // Limit number of trades per signal 
-      if((lastTP!=tp_price) && (lastSL!=sl)){
+  if((orderType? (PRICE<tp_price && PRICE>sl) : (PRICE>tp_price && PRICE<sl))){ //monitor completion of order
+     
+     if((TotalOrder(MAGIC)<=NO_OF_TRADES) && total_order<=NO_OF_TRADES){ // Limit number of trades per signal 
+        if((lastTP!=tp_price) && (lastSL!=sl)){ //allow new orders after last order is complete
       
-      tp_price = (total_order==2?tp2:(total_order==1?tp1 : tp_price));
-      
+         tp_price = (total_order==2?tp2:(total_order==1?tp1 : tp_price));
          Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
          //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC);//0,clrBlack
          total_order++;   
+         
+        }
+      }else if((orderType? (PRICE>tp2) : (PRICE<tp2) )){ //when price reaches tp2 move stoploss to tp1
+         ModifyOrders(tp1,tp_price,MAGIC);
       }
-    }
-   }else{
-      if((lastTP!=tp_price) && (lastSL!=sl)){
-            total_order=0;
+      
+   }else{ //order is now complete
+      if((lastTP!=tp_price) && (lastSL!=sl)){ //allow new orders after last order is complete
+            total_order=1;
             lastTP = tp_price;
             lastSL = sl; 
             Print("Total Order Reset");
       }
    }
- 
-//--- 
+
+  }
+  
+  void ModifyOrders(double sl,double tp,int magic){
+      for(int a=0;a<OrdersTotal();a++){
+      OrderSelect(a,SELECT_BY_POS);
+           if(OrderMagicNumber() == magic)
+         {
+           OrderSelect(a,SELECT_BY_POS);
+         //  OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp);//0,clrBlack
+           Print("(sl,tp)MODIFY("+sl+","+tp+")");
+         }  
+      }
   }
     
     double TotalOrder(int magic)
