@@ -75,7 +75,7 @@ void OnTick()
   if((TotalOrder(MAGIC)<=NO_OF_TRADES) && total_order<=NO_OF_TRADES){ // Limit number of trades per signal 
       if((lastTP!=tp_price) && (lastSL!=sl)){
       
-      tp_price = (total_order==2?tp2:(total_order==3?tp1 : tp_price));
+      tp_price = (total_order==2?tp2:(total_order==1?tp1 : tp_price));
       
          Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
          //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC);//0,clrBlack
