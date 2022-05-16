@@ -9,7 +9,7 @@
 #property strict
 
 //--- input parameters
-input float    LOT=0.02;
+input float    LOT=0.01;
 input int      NO_OF_TRADES=3;
 input int      MAGIC=838;
 
@@ -50,16 +50,18 @@ void OnTick()
     string obj_name = ObjectName(ObjectsTotal()-1);
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    int tp2_object_index = ((ObjectsTotal()-4)/9*4);
-    obj_name = ObjectName(tp2_object_index);
+    int tp2_object_index = ((ObjectsTotal()-4)/10*6)-1;
+    obj_name = ObjectName(tp2_object_index+4);
     double tp2 =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    int tp1_object_index = ((ObjectsTotal()-4)/9*2);
-    obj_name = ObjectName(tp1_object_index);
+    int tp1_object_index = ((ObjectsTotal()-4)/10*5)-1;
+    obj_name = ObjectName(tp1_object_index+4);
     double tp1 =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
-    int sl_object_index = ((ObjectsTotal()-4)/9);
-    obj_name = ObjectName(sl_object_index);
+    // Print((ObjectsTotal()-4)+";"+tp1_object_index);
+    
+    int sl_object_index = ((ObjectsTotal()-4)/10)-1;
+    obj_name = ObjectName(sl_object_index+4);
     double sl =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
    // Print(sl+";"+tp_price);
