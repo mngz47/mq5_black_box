@@ -104,7 +104,7 @@ void OnTick()
            if(OrderMagicNumber() == magic)
          {
            OrderSelect(a,SELECT_BY_POS);
-         //  OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp);//0,clrBlack
+         //  OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);//,clrBlack
            Print("(sl,tp)MODIFY("+sl+","+tp+")");
          }  
       }
