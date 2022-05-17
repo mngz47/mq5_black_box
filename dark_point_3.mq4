@@ -15,13 +15,14 @@ input int      MAGIC=838;
 
 //+------------------------------------------------------------------+
 //       Expert initialization function                  
-//       US30   H1
+//       US30   H4
+//       USTECH M5
 //+------------------------------------------------------------------+
  
 int OnInit()
   {
   
-  double indicator =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
+ indicator  =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
       
 //---
    return(INIT_SUCCEEDED);
@@ -43,10 +44,20 @@ int total_order = 0;
 double lastTP = 0; //keep track of successful tp to prevent repeat entry (in consolidating market)
 double lastSL = 0;
 
+double indicator = 0;
+
 void OnTick()
   {
   
-    //take profit
+  
+   detectNewBar();
+   if(isNewBar){
+   
+    indicator  =  iCustom(Symbol(), PERIOD_CURRENT, "Dark Point", 0, 0, 0);
+   
+      if(indicator){
+      
+      //take profit
     string obj_name = ObjectName(ObjectsTotal()-1);
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
@@ -95,6 +106,10 @@ void OnTick()
             Print("Total Order Reset");
       }
    }
+      }else{
+            Print("Fix Indicator");
+      }
+   }
 
   }
   
@@ -123,3 +138,28 @@ void OnTick()
      }
    return(GetTotalOrder);
   }
+  
+   datetime Old_Time;
+   datetime New_Time[1];
+   
+   bool isNewBar = true;
+    
+    void detectNewBar(){ //monitor bar activity
+    
+// copying the last bar time to the element New_Time[0]
+   int copied=CopyTime(_Symbol,_Period,0,1,New_Time);
+   if(copied>0) // ok, the data has been copied successfully
+     {
+      if(Old_Time!=New_Time[0]) // if old time isn't equal to new bar time
+        {
+         Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
+          Old_Time=New_Time[0];// saving bar time
+          isNewBar = true;
+        }
+     }
+   else
+     {
+      Print("Error in copying historical times data, error =",GetLastError());
+      ResetLastError();
+     }
+    }
