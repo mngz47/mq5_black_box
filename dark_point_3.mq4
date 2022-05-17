@@ -38,7 +38,7 @@ void OnDeinit(const int reason)
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
 
-int total_order = 1;
+int total_order = 0;
 
 double lastTP = 0; //keep track of successful tp to prevent repeat entry (in consolidating market)
 double lastSL = 0;
@@ -74,12 +74,12 @@ void OnTick()
     
   if((orderType? (PRICE<tp_price && PRICE>sl) : (PRICE>tp_price && PRICE<sl))){ //monitor completion of order
      
-     if((TotalOrder(MAGIC)<=NO_OF_TRADES) && total_order<=NO_OF_TRADES){ // Limit number of trades per signal 
+     if((TotalOrder(MAGIC)<NO_OF_TRADES) && total_order<NO_OF_TRADES){ // Limit number of trades per signal 
         if((lastTP!=tp_price) && (lastSL!=sl)){ //allow new orders after last order is complete
       
-         tp_price = (total_order==2?tp2:(total_order==1?tp1 : tp_price));
-         Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
-         //OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC);//0,clrBlack
+         tp_price = (total_order==1?tp2:(total_order==0?tp1 : tp_price));
+        // Print("(orderType,"+obj_name+",tp)SIGNAL("+(orderType?"buy":"Sell")+","+sl+","+tp_price+")");
+         OrderSend(Symbol(),(orderType?OP_BUY:OP_SELL),LOT,Ask,0,sl,tp_price,0,MAGIC);//0,clrBlack
          total_order++;   
          
         }
@@ -89,7 +89,7 @@ void OnTick()
       
    }else{ //order is now complete
       if((lastTP!=tp_price) && (lastSL!=sl)){ //allow new orders after last order is complete
-            total_order=1;
+            total_order=0;
             lastTP = tp_price;
             lastSL = sl; 
             Print("Total Order Reset");
@@ -104,8 +104,8 @@ void OnTick()
            if(OrderMagicNumber() == magic)
          {
            OrderSelect(a,SELECT_BY_POS);
-         //  OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);//,clrBlack
-           Print("(sl,tp)MODIFY("+sl+","+tp+")");
+         OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);//0,clrBlack
+           //Print("(sl,tp)MODIFY("+sl+","+tp+")");
          }  
       }
   }
@@ -118,7 +118,7 @@ void OnTick()
        OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
        if(OrderMagicNumber() == magic)
          {
-           GetTotalOrder += (OrdersTotal());
+           GetTotalOrder++;
          }   
      }
    return(GetTotalOrder);
