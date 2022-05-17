@@ -13,12 +13,6 @@ input float    LOT=0.01;
 input int      NO_OF_TRADES=3;
 input int      MAGIC=838;
 
-//+------------------------------------------------------------------+
-//       Expert initialization function                  
-//       US30   H4
-//       USTECH M5
-//+------------------------------------------------------------------+
- 
 int OnInit()
   {
   
@@ -57,7 +51,20 @@ void OnTick()
    
       if(indicator){
       
-      //take profit
+      }else{
+            Print("Fix Indicator");
+      }
+      isNewBar = false;
+   }
+   
+   NewOrder();
+   
+  }
+  
+  
+  void NewOrder(){
+  
+    //take profit
     string obj_name = ObjectName(ObjectsTotal()-1);
     double tp_price = ObjectGet(obj_name, OBJPROP_PRICE1);
     
@@ -105,13 +112,10 @@ void OnTick()
             lastSL = sl; 
             Print("Total Order Reset");
       }
-   }
-      }else{
-            Print("Fix Indicator");
-      }
-   }
-
+    }
   }
+  
+  
   
   void ModifyOrders(double sl,double tp,int magic){
       for(int a=0;a<OrdersTotal();a++){
