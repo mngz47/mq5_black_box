@@ -102,7 +102,7 @@ void OnTick()
          
         }
       }else if((orderType? (PRICE>tp2) : (PRICE<tp2) )){ //when price reaches tp2 move stoploss to tp1
-         ModifyOrders(tp1,tp_price,MAGIC);
+         ModifyOrders(tp1,0,MAGIC); //tp=0 to catch overall direction
       }
       
    }else{ //order is now complete
@@ -123,7 +123,7 @@ void OnTick()
            if(OrderMagicNumber() == magic)
          {
            OrderSelect(a,SELECT_BY_POS);
-         OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);//0,clrBlack
+         OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);//,clrBlack
            //Print("(sl,tp)MODIFY("+sl+","+tp+")");
          }  
       }
