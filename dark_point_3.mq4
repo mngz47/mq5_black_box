@@ -118,6 +118,10 @@ void OnTick()
         
          int max = MathRound(OrdersTotal()*0.7); //secure 70% of potential profit
          CloseOrders(max,MAGIC);
+      
+      }else if((orderType? (PRICE>tp_price) : (PRICE<tp_price) )){
+          ModifyOrders(tp2,0,MAGIC);
+         
       }
       
    }else{ //order is now complete
