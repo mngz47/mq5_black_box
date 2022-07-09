@@ -57,10 +57,22 @@ void OnTick()
       isNewBar = false;
    }
    
+   if(TradingTime()){
    NewOrder();
+   }
    
   }
   
+  bool TradingTime(){
+  
+            bool time = false;
+            
+            if((Hour()>19 || Hour()<6)){
+                  time = true;
+            }
+            
+         return time;
+  }
   
   void NewOrder(){
   
@@ -102,7 +114,10 @@ void OnTick()
          
         }
       }else if((orderType? (PRICE>tp2) : (PRICE<tp2) )){ //when price reaches tp2 move stoploss to tp1
-         ModifyOrders(tp1,0,MAGIC); //tp=0 to catch overall direction
+         ModifyOrders(tp1,0,MAGIC); //tp=0 to catch overall trend
+        
+         int max = MathRound(OrdersTotal()*0.7); //secure 70% of potential profit
+         CloseOrders(max,MAGIC);
       }
       
    }else{ //order is now complete
@@ -115,6 +130,17 @@ void OnTick()
     }
   }
   
+  void CloseOrders(int max,int magic){
+       for(int a=0;a<max;a++){
+      OrderSelect(a,SELECT_BY_POS);
+           if(OrderMagicNumber() == magic)
+         {
+         OrderSelect(a,SELECT_BY_POS);
+         double PRICE = (OrderType()==OP_BUY?Bid:Ask);
+         OrderClose(OrderTicket(),OrderLots(),PRICE,3,CLR_NONE);
+         }  
+      }
+  }
   
   
   void ModifyOrders(double sl,double tp,int magic){
