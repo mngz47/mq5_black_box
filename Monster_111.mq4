@@ -85,6 +85,7 @@ ________________________________
 
 //input string   OPTION1 = "EURAUD-EURNZD, M1, $30";
 //input string   OPTION2 = "GOLD, M5, $30";
+// "GBPJPY, H4, $7";
 
 input string   INFO = "Click Cancel (Auto magic number will reset)";
 
