@@ -18,6 +18,12 @@ int OnInit()
   
  indicator  =  iCustom(Symbol(), PERIOD_CURRENT, "Order-Block-Indicator-for-MT4", 0, 0, 0);
       
+   ChartSetInteger(0,CHART_COLOR_BACKGROUND,clrAliceBlue);
+   ChartSetInteger(0,CHART_COLOR_FOREGROUND,clrBlack);
+   ChartSetInteger(0,CHART_COLOR_GRID,clrGreen);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BEAR,clrBlack);
+   ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrYellow);
+      
 //---
    return(INIT_SUCCEEDED);
   }
