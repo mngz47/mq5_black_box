@@ -12,7 +12,7 @@
 //+------------------------------------------------------------------+
 //--- input parameters
 input float    LOT=0.01;
-input int      NO_OF_TRADES=3;
+input int      NO_OF_TRADES=1;
 input int      MAGIC=838;
 
 //+------------------------------------------------------------------+
@@ -72,18 +72,20 @@ void OnTick()
     
   bool rejectionWickRoof(int index){
    
-   float open_close = (Open[index]>Close[index]?Open[index]:Close[index]);
-   float wick = High[index]-open_close;
-   return (((Open[index]-Close[index])<wick) && Open[index+1]<High[index]); 
+   float wick = High[index]-Close[index];
+   float upBar = Close[index]-Open[index];
+   bool upReverse = Open[index+1]<High[index];
    
+   return ((upBar<wick) && upReverse); 
    }
    
    bool rejectionWickFloor(int index){
    
-   float open_close = (Open[index]<Close[index]?Open[index]:Close[index]);
-   float wick = open_close-Low[index];
-   return (((Close[index]-Open[index])<wick) && Open[index+1]>Low[index]);
-    
+   float wick = Close[index]-Low[index];
+   float downBar = Open[index]-Close[index];
+   bool downReverse = Open[index+1]>Low[index];
+   
+   return ((downBar<wick) && downReverse);
    }
    
    bool doubleBarRoof(int index){
@@ -116,7 +118,7 @@ void OnTick()
    void closeAllTrades(int magic){
     for(int aa=0;aa<OrdersTotal();aa++){
          OrderSelect(aa,SELECT_BY_POS);
-        if(OrderMagicNumber() == magic && OrderProfit()>0)
+        if(OrderMagicNumber()==magic && OrderProfit()>2)
          {
         double PRICE = (OrderType()==OP_BUY?Bid:Ask);
         OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
