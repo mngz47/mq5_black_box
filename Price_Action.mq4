@@ -35,7 +35,7 @@ int OnInit()
  datetime Old_Time;
    datetime New_Time[1];
    
-   bool isNewBar = true;
+   bool isNewBar = false;
     
     void detectNewBar(){ //monitor bar activity
     
@@ -136,10 +136,10 @@ void OnTick()
    double GetTotalOrder = 0;
    for(int cnt = 0; cnt < OrdersTotal(); cnt++)
      {
-       OrderSelect(cnt, SELECT_BY_POS, MODE_TRADES);
+       OrderSelect(cnt, SELECT_BY_POS);
        if(OrderMagicNumber() == magic)
          {
-           GetTotalOrder += (OrdersTotal());
+           GetTotalOrder+=1;
          }   
      }
    return(GetTotalOrder);
