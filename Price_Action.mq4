@@ -89,14 +89,14 @@ void OnTick()
    }
    
    bool doubleBarRoof(int index){
-      bool lowBreak = Low[index+1]>=Low[index];
+      bool lowBreak = Close[index+1]>=Close[index];
       bool upReverse = Open[index+2]<High[index];
    
    return (lowBreak && upReverse);
    }
    
    bool doubleBarFloor(int index){
-      bool highBreak = High[index+1]<=High[index];
+      bool highBreak = Close[index+1]<=Close[index];
       bool downReverse = Open[index+2]>Low[index];
    
    return (highBreak && downReverse);
