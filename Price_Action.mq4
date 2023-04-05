@@ -39,36 +39,48 @@ void OnTick()
    }
   }
     
-  bool rejectionWickRoof(int index){
+   float volume = 0;
+   bool getMomentum(float wick){//movement strength towards specific direction
+       if(wick>=volume){
+         volume=wick;
+       }
+       return (wick>=volume);
+   }
+    
+   float upBar(int index){//direction of candle going up
+    return Close[index]-Open[index];
+   }
    
+   bool upReverse(int i2,int i1){//confirm change in direction
+   return Open[i2]<Open[i1];
+   }
+    
+   float downBar(int index){ //direction of candle going down
+   return Open[index]-Close[index];
+   }
+  
+   bool downReverse(int i2,int i1){//confirm change in direction
+   return Open[i2]>Open[i1];
+   }
+  
+   bool rejectionWickRoof(int index){
    float wick = High[index]-Close[index];
-   float upBar = Close[index]-Open[index];
-   bool upReverse = Open[index+1]<Open[index];
-   
-   return ((upBar<wick) && upReverse); 
+   return ((upBar(index)<wick) && upReverse(index+1,index) && getMomentum(wick)); 
    }
    
    bool rejectionWickFloor(int index){
-   
    float wick = Close[index]-Low[index];
-   float downBar = Open[index]-Close[index];
-   bool downReverse = Open[index+1]>Open[index];
-   
-   return ((downBar<wick) && downReverse);
+   return ((downBar(index)<wick) && downReverse(index+1,index) && getMomentum(wick));
    }
    
    bool doubleBarRoof(int index){
-      bool lowBreak = Close[index+1]>Close[index];
-      bool upReverse = Open[index+2]<Open[index];
-   
-   return (lowBreak && upReverse);
+   bool lowBreak = Close[index+1]>Close[index];
+   return (lowBreak && upReverse(index+2,index) && getMomentum(downBar(index)));
    }
    
    bool doubleBarFloor(int index){
-      bool highBreak = Close[index+1]<Close[index];
-      bool downReverse = Open[index+2]>Open[index];
-   
-   return (highBreak && downReverse);
+   bool highBreak = Close[index+1]<Close[index];
+   return (highBreak && downReverse(index+2,index) && getMomentum(upBar(index)));
    }
  
     void newEntry(){
