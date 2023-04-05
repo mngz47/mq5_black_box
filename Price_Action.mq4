@@ -1,23 +1,15 @@
 //+------------------------------------------------------------------+
 //|                                                 Price_Action.mq4 |
-//|                        Copyright 2023, MetaQuotes Software Corp. |
-//|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2023, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #property strict
-//+------------------------------------------------------------------+
-//| Expert initialization function                                   |
-//+------------------------------------------------------------------+
-//--- input parameters
+
 input float    LOT=0.01;
 input int      NO_OF_TRADES=1;
 input int      MAGIC=838;
 
-//+------------------------------------------------------------------+
-//| Expert initialization function                                   |
-//+------------------------------------------------------------------+
 int OnInit()
   {
    
@@ -28,30 +20,23 @@ int OnInit()
    ChartSetInteger(0,CHART_COLOR_CANDLE_BULL,clrGreen);
    return(INIT_SUCCEEDED);
   }
-//+------------------------------------------------------------------+
-//| Expert deinitialization function                                 |
-//+------------------------------------------------------------------+
-  
- bool isNewBar = false;
-   void detectNewBar(){
-    if((Hour()==3 || Hour()==7 || Hour()==11 || Hour()==15 || Hour()==19 || Hour()==23) && Minute()<3){
-         isNewBar = true;
-    }else{
-         isNewBar = false;
-    }
+    
+  datetime NewCandleTime = TimeCurrent();
+bool IsNewCandle()
+{
+   if (NewCandleTime == iTime(Symbol(), 0, 0)) return false;
+   else
+   {
+      NewCandleTime = iTime(Symbol(), 0, 0);
+      return true;
    }
-  
-//+------------------------------------------------------------------+
-//| Expert tick function                                             |
-//+------------------------------------------------------------------+
+}
+
 void OnTick()
   {
-  
-  detectNewBar();
-   if(isNewBar){
+  if(IsNewCandle()){
    newEntry();
    }
-//---
   }
     
   bool rejectionWickRoof(int index){
