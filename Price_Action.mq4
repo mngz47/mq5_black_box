@@ -74,7 +74,7 @@ void OnTick()
    
    float wick = High[index]-Close[index];
    float upBar = Close[index]-Open[index];
-   bool upReverse = Open[index+1]<High[index];
+   bool upReverse = Open[index+1]<Open[index];
    
    return ((upBar<wick) && upReverse); 
    }
@@ -83,21 +83,21 @@ void OnTick()
    
    float wick = Close[index]-Low[index];
    float downBar = Open[index]-Close[index];
-   bool downReverse = Open[index+1]>Low[index];
+   bool downReverse = Open[index+1]>Open[index];
    
    return ((downBar<wick) && downReverse);
    }
    
    bool doubleBarRoof(int index){
       bool lowBreak = Close[index+1]>Close[index];
-      bool upReverse = Open[index+2]<High[index];
+      bool upReverse = Open[index+2]<Open[index];
    
    return (lowBreak && upReverse);
    }
    
    bool doubleBarFloor(int index){
       bool highBreak = Close[index+1]<Close[index];
-      bool downReverse = Open[index+2]>Low[index];
+      bool downReverse = Open[index+2]>Open[index];
    
    return (highBreak && downReverse);
    }
