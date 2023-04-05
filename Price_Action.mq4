@@ -72,18 +72,20 @@ void OnTick()
    }
  
     void newEntry(){
-   while((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
    if(rejectionWickFloor(1) || doubleBarFloor(1)){
       closeAllTrades(MAGIC,OP_SELL);
       float sl = Low[1];
       float tp = 0;
+         while((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
       OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,tp,0,MAGIC,0,clrGreen);
+      }
    }else if (rejectionWickRoof(1) || doubleBarRoof(1)){ 
       closeAllTrades(MAGIC,OP_BUY);
       float sl = High[1];
       float tp = 0;
+         while((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
       OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,tp,0,MAGIC,0,clrRed);
-   }
+      }
    }
    }
    
