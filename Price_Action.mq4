@@ -106,13 +106,13 @@ void OnTick()
    if((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
     double Price  = (Ask+Bid)/2;
    if(rejectionWickFloor(1) || doubleBarFloor(1)){
-      closeAllTrades(MAGIC);
+      closeAllTrades(MAGIC,OP_SELL);
       float sl = Low[1];
       float tp = 0;
       OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,tp,0,MAGIC,0,clrGreen);
       isNewBar = false;
    }else if (rejectionWickRoof(1) || doubleBarRoof(1)){ 
-      closeAllTrades(MAGIC);
+      closeAllTrades(MAGIC,OP_BUY);
       float sl = High[1];
       float tp = 0;
       OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,tp,0,MAGIC,0,clrRed);
@@ -121,10 +121,10 @@ void OnTick()
    }
    }
    
-   void closeAllTrades(int magic){
+   void closeAllTrades(int magic,int type){
     for(int aa=0;aa<OrdersTotal();aa++){
          OrderSelect(aa,SELECT_BY_POS);
-        if(OrderMagicNumber()==magic && OrderProfit()>2)
+        if(OrderMagicNumber()==magic && OrderType()==type)
          {
         double PRICE = (OrderType()==OP_BUY?Bid:Ask);
         OrderClose(OrderTicket(),OrderLots(),PRICE,3,White);
