@@ -101,10 +101,9 @@ void OnTick()
    
    return (highBreak && downReverse);
    }
-    
+ 
     void newEntry(){
-   if((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
-    double Price  = (Ask+Bid)/2;
+   while((TotalOrder(MAGIC)<NO_OF_TRADES)){ 
    if(rejectionWickFloor(1) || doubleBarFloor(1)){
       closeAllTrades(MAGIC,OP_SELL);
       float sl = Low[1];
