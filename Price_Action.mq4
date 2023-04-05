@@ -34,7 +34,7 @@ int OnInit()
   
  bool isNewBar = false;
    void detectNewBar(){
-    if(Hour()==3 || Hour()==7 || Hour()==11 || Hour()==15 || Hour()==19 || Hour()==23){
+    if((Hour()==3 || Hour()==7 || Hour()==11 || Hour()==15 || Hour()==19 || Hour()==23) && Minute()<3){
          isNewBar = true;
     }else{
          isNewBar = false;
