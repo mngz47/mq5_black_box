@@ -32,30 +32,14 @@ int OnInit()
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
   
- datetime Old_Time;
-   datetime New_Time[1];
-   
-   bool isNewBar = false;
-    
-    void detectNewBar(){ //monitor bar activity
-    
-// copying the last bar time to the element New_Time[0]
-   int copied=CopyTime(_Symbol,_Period,0,1,New_Time);
-   if(copied>0) // ok, the data has been copied successfully
-     {
-      if(Old_Time!=New_Time[0]) // if old time isn't equal to new bar time
-        {
-         Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
-          Old_Time=New_Time[0];// saving bar time
-          isNewBar = true;
-        }
-     }
-   else
-     {
-      Print("Error in copying historical times data, error =",GetLastError());
-      ResetLastError();
-     }
+ bool isNewBar = false;
+   void detectNewBar(){
+    if(Hour()==3 || Hour()==7 || Hour()==11 || Hour()==15 || Hour()==19 || Hour()==23){
+         isNewBar = true;
+    }else{
+         isNewBar = false;
     }
+   }
   
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -109,13 +93,11 @@ void OnTick()
       float sl = Low[1];
       float tp = 0;
       OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,tp,0,MAGIC,0,clrGreen);
-      isNewBar = false;
    }else if (rejectionWickRoof(1) || doubleBarRoof(1)){ 
       closeAllTrades(MAGIC,OP_BUY);
       float sl = High[1];
       float tp = 0;
       OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,tp,0,MAGIC,0,clrRed);
-      isNewBar = false;
    }
    }
    }
