@@ -12,6 +12,7 @@
 input float    LOT=0.01;
 input int      NO_OF_TRADES=3;
 input int      MAGIC=838;
+input int      SL=30;
 
 int OnInit()
   {
@@ -80,11 +81,15 @@ void OnTick()
     if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal 
     if(PRICE>=sell_price){
     
-    OrderSend(Symbol(),OP_SELL,LOT,Bid,0,0,buy_price,0,MAGIC);
+    double sl = Bid+SL*Point;
+    
+    OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,buy_price,0,MAGIC);
     
     }else if(PRICE<=buy_price){
     
-    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,0,sell_price,0,MAGIC);
+    double sl = Ask-SL*Point;
+    
+    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,sell_price,0,MAGIC);
     
     } 
    }
