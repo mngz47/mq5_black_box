@@ -1,8 +1,8 @@
 //+------------------------------------------------------------------+
-//|                                              weekly_bias.mq4 |
+//|                                                  weekly_bias.mq4 |
 //|                        Copyright 2023, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
-//                      Use on weekly timeframe
+//                                                                   |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2023, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
@@ -29,6 +29,8 @@ int OnInit()
    return(INIT_SUCCEEDED);
   }
 
+int total_order = 0;
+
 void OnTick()
   {
   detectNewBar();
@@ -36,6 +38,7 @@ void OnTick()
   highBreak = false;
   lowBreak = false;
   isNewBar = false;
+  total_order = 0;
   }
   
   lastWeekHighBreak();
@@ -73,24 +76,43 @@ void OnTick()
          return time;
   }
    
+     double lastSL = 0;
+   
     void newEntry(){
     
-   if((TotalOrder(MAGIC)<NO_OF_TRADES)){ //limiting total number of trades during price break
+    double PRICE = (Ask+Bid)/2; 
+    
+   if((TotalOrder(MAGIC)<NO_OF_TRADES) && (total_order<NO_OF_TRADES)){ //limiting total number of trades during price break
    if(lowBreak){ 
    
-      float sl = Ask-SL*Point; 
-      float tp = 0;
-      OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,tp,0,MAGIC,0,clrAliceBlue);
+      if(lastSL!=0 && PRICE<=(lastSL)){
+    
+    OrderSend(Symbol(),OP_SELL,LOT,Ask,0,lastSL,0,0,MAGIC);
+    
+       }else{
+    
+    lastSL = Ask-SL*Point;
+    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,0,0,MAGIC,0,clrAliceBlue);
      
-   
+       } 
+       total_order++;
    }else if(highBreak){ 
    
-      float sl = Bid+SL*Point;
-      float tp = 0;
-      OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,tp,0,MAGIC,0,clrBlack);
+   if(lastSL!=0 && PRICE>=(lastSL)){
     
-  
+    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,0,0,MAGIC);
+    
+    }else{
+    
+    lastSL = Bid+SL*Point;
+    OrderSend(Symbol(),OP_SELL,LOT,Bid,0,lastSL,0,0,MAGIC,0,clrBlack);
+    
+    }
+   
+      total_order++;
    }
+   
+   
    }
    }
    
