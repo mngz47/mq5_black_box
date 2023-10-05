@@ -12,7 +12,7 @@
 input float    LOT=0.01;
 input int      NO_OF_TRADES=3;
 input int      MAGIC=838;
-input int      SL=30;
+input int      SL=70;
 
 int OnInit()
   {
@@ -44,7 +44,9 @@ void OnDeinit(const int reason)
   
 double indicator = 0;
 double sell_price;
+double sell_price2;
 double buy_price;
+double buy_price2;
 string obj_name;
 
 void OnTick()
@@ -58,9 +60,15 @@ void OnTick()
    
      obj_name = ObjectName(0);
      sell_price = ObjectGet(obj_name, OBJPROP_PRICE1);
+     
+     obj_name = ObjectName(1);
+     sell_price2 =  ObjectGet(obj_name, OBJPROP_PRICE1);
     
      obj_name = ObjectName(3);
      buy_price =  ObjectGet(obj_name, OBJPROP_PRICE1);
+     
+      obj_name = ObjectName(4);
+     buy_price2 =  ObjectGet(obj_name, OBJPROP_PRICE1);
    
       if(indicator){
       
@@ -74,6 +82,8 @@ void OnTick()
    
   }
   
+  double lastSL = 0;
+  
   void NewOrder(){
   
     double PRICE = (Ask+Bid)/2;    
@@ -81,17 +91,29 @@ void OnTick()
     if((TotalOrder(MAGIC)<NO_OF_TRADES)){ // Limit number of trades per signal 
     if(PRICE>=sell_price){
     
-    double sl = Bid+SL*Point;
+    if(lastSL!=0 && PRICE>=(lastSL)){
     
-    OrderSend(Symbol(),OP_SELL,LOT,Bid,0,sl,buy_price,0,MAGIC);
+    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,sell_price2,0,MAGIC);
+    
+    }else{
+    lastSL = Bid+SL*Point;
+    
+    OrderSend(Symbol(),OP_SELL,LOT,Bid,0,lastSL,buy_price,0,MAGIC);
+    }
     
     }else if(PRICE<=buy_price){
     
-    double sl = Ask-SL*Point;
+    if(lastSL!=0 && PRICE<=(lastSL)){
     
-    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,sl,sell_price,0,MAGIC);
+    OrderSend(Symbol(),OP_SELL,LOT,Ask,0,lastSL,buy_price2,0,MAGIC);
     
-    } 
+    }else{
+    lastSL = Ask-SL*Point;
+    
+    OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,sell_price,0,MAGIC);
+    }
+    
+    }
    }
   }
     
