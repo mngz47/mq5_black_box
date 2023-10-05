@@ -1,10 +1,10 @@
 //+------------------------------------------------------------------+
 //|                                              weekly_bias.mq4 |
-//|                        Copyright 2021, MetaQuotes Software Corp. |
+//|                        Copyright 2023, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //                      Use on weekly timeframe
 //+------------------------------------------------------------------+
-#property copyright "Copyright 2021, MetaQuotes Software Corp."
+#property copyright "Copyright 2023, MetaQuotes Software Corp."
 #property link      "https://www.mql5.com"
 #property version   "1.00"
 #property strict
@@ -31,20 +31,26 @@ int OnInit()
 
 void OnTick()
   {
+  detectNewBar();
+  if(isNewBar){
+  highBreak = false;
+  lowBreak = false;
+  isNewBar = false;
+  }
   
   lastWeekHighBreak();
   lastWeekLowBreak();
   
-   if(TradingTime()){
+  if(TradingTime()){
    newEntry();
-   }
+  }
   }
 
    bool highBreak = false;
    
    void lastWeekHighBreak(){
    double Price  = (Ask+Bid)/2;
-   highBreak = (Price>High[1]);
+   highBreak = (!highBreak?Price>High[1]:true);
      
    }
    
@@ -52,7 +58,7 @@ void OnTick()
    
    void lastWeekLowBreak(){
    double Price  = (Ask+Bid)/2;
-   lowBreak = (Price<Low[1]);
+   lowBreak = (!lowBreak?Price<Low[1]:true);
      
    }
    
@@ -102,3 +108,27 @@ void OnTick()
    return(GetTotalOrder);
   }
   
+  datetime Old_Time;
+   datetime New_Time[1];
+   
+   bool isNewBar = true;
+    
+    void detectNewBar(){ //monitor bar activity
+    
+// copying the last bar time to the element New_Time[0]
+   int copied=CopyTime(_Symbol,_Period,0,1,New_Time);
+   if(copied>0) // ok, the data has been copied successfully
+     {
+      if(Old_Time!=New_Time[0]) // if old time isn't equal to new bar time
+        {
+         Print("We have new bar here ",New_Time[0]," old time was ",Old_Time);
+          Old_Time=New_Time[0];// saving bar time
+          isNewBar = true;
+        }
+     }
+   else
+     {
+      Print("Error in copying historical times data, error =",GetLastError());
+      ResetLastError();
+     }
+    } 
