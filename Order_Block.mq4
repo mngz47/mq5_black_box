@@ -76,9 +76,8 @@ void OnTick()
             Print("Fix Indicator");
       }
       
-      double m_price = (lastSL>sell_price?buy_price:(lastSL<sell_price?sell_price2:(lastSL<buy_price?sell_price:buy_price2)));
-      
-      ModifyOrders(lastSL,m_price,MAGIC);
+     
+      ModifyOrders();
       
       isNewBar = false;
    }
@@ -88,13 +87,19 @@ void OnTick()
   }
   
   
-    void ModifyOrders(double sl,double tp,int magic){
+    void ModifyOrders(){
+     
+         
+     
       for(int a=0;a<OrdersTotal();a++){
       OrderSelect(a,SELECT_BY_POS);
-           if(OrderMagicNumber() == magic)
+           if(OrderMagicNumber() == MAGIC)
          {
            OrderSelect(a,SELECT_BY_POS);
-           OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);
+           
+           double m_price = (OrderType()==OP_BUY? (lastSL<buy_price?sell_price:sell_price2) : (lastSL>sell_price?buy_price:buy_price2) );
+       
+           OrderModify(OrderTicket(),OrderOpenPrice(),lastSL,m_price,0);
          }  
       }
   }
