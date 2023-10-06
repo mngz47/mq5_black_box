@@ -75,11 +75,28 @@ void OnTick()
       }else{
             Print("Fix Indicator");
       }
+      
+      double m_price = (lastSL>sell_price?buy_price:(lastSL<sell_price?sell_price2:(lastSL<buy_price?sell_price:buy_price2)));
+      
+      ModifyOrders(lastSL,m_price,MAGIC);
+      
       isNewBar = false;
    }
    
    NewOrder();
    
+  }
+  
+  
+    void ModifyOrders(double sl,double tp,int magic){
+      for(int a=0;a<OrdersTotal();a++){
+      OrderSelect(a,SELECT_BY_POS);
+           if(OrderMagicNumber() == magic)
+         {
+           OrderSelect(a,SELECT_BY_POS);
+           OrderModify(OrderTicket(),OrderOpenPrice(),sl,tp,0);
+         }  
+      }
   }
   
   double lastSL = 0;
