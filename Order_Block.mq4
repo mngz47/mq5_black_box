@@ -78,6 +78,7 @@ void OnTick()
       
      
       ModifyOrders();
+      ModifyLastSL()
       
       isNewBar = false;
    }
@@ -88,9 +89,6 @@ void OnTick()
   
   
     void ModifyOrders(){
-     
-         
-     
       for(int a=0;a<OrdersTotal();a++){
       OrderSelect(a,SELECT_BY_POS);
            if(OrderMagicNumber() == MAGIC)
@@ -100,11 +98,43 @@ void OnTick()
            double m_price = (OrderType()==OP_BUY? (lastSL<buy_price?sell_price:sell_price2) : (lastSL>sell_price?buy_price:buy_price2) );
        
            OrderModify(OrderTicket(),OrderOpenPrice(),lastSL,m_price,0);
+           lastTP = m_price;
+           
          }  
       }
   }
   
+  void ModifyLastSL(){
+  
+  double PRICE = (Ask+Bid)/2;
+  
+  if(OrdersTotal()>0){
+      OrderSelect(0,SELECT_BY_POS);
+           if(OrderMagicNumber() == MAGIC)
+         {
+           OrderSelect(0,SELECT_BY_POS);
+           if(OrderType()==OP_BUY){
+           
+           if(PRICE>=lastTP){
+           
+           lastSL = 0;
+           
+           }
+           
+           }else{
+           
+           if(PRICE<=lastTP){
+           
+           lastSL = 0;
+           
+           }
+          }
+        }
+     }
+  }
+  
   double lastSL = 0;
+  double lastTP = 0;
   
   void NewOrder(){
   
@@ -116,11 +146,14 @@ void OnTick()
     if(lastSL!=0 && PRICE>=(lastSL)){
     
     OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,sell_price2,0,MAGIC);
+    lastTP = sell_price2;
     
     }else{
     lastSL = Bid+SL*Point;
     
     OrderSend(Symbol(),OP_SELL,LOT,Bid,0,lastSL,buy_price,0,MAGIC);
+    lastTP = buy_price;
+    
     }
     
     }else if(PRICE<=buy_price){
@@ -128,11 +161,14 @@ void OnTick()
     if(lastSL!=0 && PRICE<=(lastSL)){
     
     OrderSend(Symbol(),OP_SELL,LOT,Ask,0,lastSL,buy_price2,0,MAGIC);
+    lastTP = buy_price2;
     
     }else{
     lastSL = Ask-SL*Point;
     
     OrderSend(Symbol(),OP_BUY,LOT,Ask,0,lastSL,sell_price,0,MAGIC);
+    lastTP = sell_price;
+    
     }
     
     }
