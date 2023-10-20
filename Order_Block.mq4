@@ -78,11 +78,11 @@ void OnTick()
       
      
       ModifyOrders();
-      ModifyLastSL()
       
       isNewBar = false;
    }
    
+   ModifyLastSL();
    NewOrder();
    
   }
